@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>ToDo</title>
+    <script src="./react-0.12.2.min.js"></script>
+    <script src="./JSXTransformer-0.13.3.js"></script>
+</head>
+<body>
+<div id="todo">
+
+</div>
+
+<script type="text/jsx">
+
+
+    var TODO = React.createClass({
+        render: function(){
+            return (
+                    <h3>TODO</h3>
+            );
+        }
+    });
+    var TodoList = React.createClass({
+        deleteitemlistfun: function(ITEM){
+
+            this.props.deleteItemApp(ITEM);
+            //alert("deleteitemlistfun called");
+            return;
+        },
+        render: function() {
+            console.log(this.props);
+            var deleteitem = this.deleteitemlistfun;
+            var createItem = function(itemText) {             // return the item list in ordered list
+                return (
+                        <TodoListItem deleteItemList={deleteitem} >{itemText}</TodoListItem>
+                );
+            };
+            return <ol>{this.props.items.map(createItem)}</ol>; // .map modefy the values of items by calling function createItem for every item from items.
+        }
+    });
+    var TodoListItem = React.createClass({
+        deleteItem: function(){
+            //window.location.href="https://www.google.com";
+            var ITEM = this.props.children;
+            //alert("deleteItem called");
+            //alert(this.props);
+            this.props.deleteItemList(ITEM);
+            //alert("deleteItemList called from item");
+            return;
+        },
+        render: function(){
+            console.log(this.props);
+//            var item = this.props.children;
+//            var len = item.length;
+//            item += Array(10 - len+3).join(" ");
+//            alert(item);
+            return (
+                    <div>
+                        <li>
+                            <input type="checkbox" value="test" />
+                            <input type="button" value="del" onClick={this.deleteItem}/>                            <label>
+                            {this.props.children}
+                        </label>
+                        </li>
+                    </div>
+            );
+        }
+    });
+
+
+
+
+
+    var TodoForm = React.createClass({
+        getInitialState: function() {
+            return {item: ''};
+        },
+        onsubmit: function(e){
+            e.preventDefault();
+            this.props.onFormSubmit(this.state.item);
+            this.setState({item: ''});
+            //React.findDOMNode(this.refs.item).focus();
+            return;
+        },
+        onChange: function(e){
+            //alert("onchange");
+            this.setState({
+                item: e.target.value
+            });
+        },
+        deleteall(){
+            this.props.deleteall();
+        },
+        render: function(){
+            return (
+                    <form onSubmit={this.onsubmit}>
+                        <input type='text' ref='item' onChange={this.onChange} value={this.state.item}/>
+                        <input type='submit' value='Add'/>
+                        <input type='button' value='Delete All' onClick={this.deleteall}/>
+                    </form>
+            );
+        }
+    });
+
+    var TodoApp = React.createClass({
+        getInitialState: function() {       // initialise a private state items with initial value null
+            if(this.items==null){
+                if(document.cookie.length == 0 || document.cookie=='8090756661'){
+                    //alert("cookie not found");
+                    //alert(document.cookie);
+                }
+                else{
+                    //alert("cookie found" );
+                    //alert(document.cookie.length);
+                    var array = document.cookie;
+                    array = array.split(',');
+                    return {items: array};
+                }
+
+            }
+            else{
+                document.cookie = this.items;
+            }
+            return {
+                items: []
+            };
+        },
+        addItems: function(newItem) {
+            var allItems = this.state.items;
+            allItems = allItems.concat([newItem]);
+            if(allItems.length==0 ){
+                alert(allItems);
+                document.cookie="8090756661";
+            }
+            else{
+                document.cookie = allItems;
+            }
+            this.setState({
+                items: allItems
+            });
+        },
+        deleteItems: function(ITEM){
+            var allItems = this.state.items;
+            var index = allItems.indexOf(ITEM);
+            //console.log("deleteItems called");
+            allItems.splice(index,1);
+            //console.log(allItems);
+            if(allItems.length==0 ){
+                document.cookie="8090756661";
+            }
+            else{
+                document.cookie = allItems;
+            }
+            console.log(document.cookie);
+            this.setState({
+                items: allItems
+            });
+        },
+        deleteall: function () {
+            //alert("deleteall called");
+            document.cookie = "8090756661";
+            this.setState({
+                items: []
+            });
+        },
+        render: function() {
+            if(this.state.items==null){
+                return (
+                        <div>
+                            <TODO/>
+                            <TodoForm onFormSubmit={this.addItems}/>
+                        </div>
+                );
+            }
+            return (
+                    <div>
+                        <TODO/>
+                        <TodoList items={this.state.items} deleteItemApp={this.deleteItems}/>
+                        <TodoForm onFormSubmit={this.addItems} deleteall={this.deleteall}/>
+                    </div>
+            );
+        }
+    });
+
+    React.renderComponent(<TodoApp/>, document.getElementById('todo'));
+
+</script>
+</body>
+</html>
